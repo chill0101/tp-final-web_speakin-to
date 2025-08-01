@@ -1,0 +1,32 @@
+# Laravel & Node common ignores
+/vendor/
+/node_modules/
+.env
+.git/
+*.log
+*.cache
+/storage/*.log
+/storage/*.cache
+/storage/framework/
+/storage/logs/
+/public/build/
+
+# Ignore IDE/editor files
+*.swp
+*.swo
+*.idea/
+*.vscode/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore composer & npm lock files (optional)
+composer.lock
+package-lock.json
+
+# Ignore everything in storage/app except:
+/storage/app/*
+!/storage/app/private/
+!/storage/app/public/
+!/storage/app/.gitignore

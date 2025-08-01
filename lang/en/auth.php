@@ -1,0 +1,9 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'failed'   => 'Revise las credenciales. No coinciden con nuestros registros.',
+    'password' => 'La contraseña proporcionada es incorrecta.',
+    'throttle' => 'Demasiados intentos de inicio de sesión. Por favor, inténtelo de nuevo en :seconds segundos.',
+];
