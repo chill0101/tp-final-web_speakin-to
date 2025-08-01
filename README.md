@@ -1,18 +1,10 @@
-# PAM System: *Practical* *Appointment* *Management* System
+# TP Final: Speak-In App
 
 ## Descripción General
 
-Este proyecto es un sistema de gestión de turnos cursos de idiomas en **Laravel 12**, utilizando **Laravel Breeze** para la autenticación y **Tailwind CSS** para el diseño. Permite la administración de alumnos, docentes, cursos e inscripciones, diferenciando funcionalidades según el rol del usuario (admin o coordinador). Además, permite administrar evaluaciones y archivos adjuntos.
-// Los comentarios, entidades y el código están en inglés, pero la experiencia de usuario está en español.
+Speak-In App es un sistema de gestión de cursos de idiomas desarrollado en **Laravel 12**, con **Laravel Breeze** para autenticación y **Tailwind CSS** para el diseño. Permite administrar alumnos, docentes, cursos, inscripciones, evaluaciones y archivos adjuntos, diferenciando funcionalidades según el rol del usuario (admin, coordinador, docente, alumno). La experiencia de usuario está completamente en español.
 
-
-
-
-
-
-
-
-
+---
 ## Diseño
 
 Está diseñado con la arquitectura MVC (Modelo-Vista-Controlador) y sigue buenas prácticas de **[Laravel](https://laravel.com/docs/12.x/installation)**( o eso intenta ._. ). Utiliza componentes Blade por defecto y customizados. Breeze facilita el uso de componentes reutilizables como inputs, dropdowns y botones.
@@ -29,75 +21,166 @@ Está diseñado con la arquitectura MVC (Modelo-Vista-Controlador) y sigue buena
 - **Blade UI Kit**: Componentes de íconos
 - **MySQL**: Base de datos
 - **Seeder y Factory**: Poblar la base de datos
-- **Youtube**: El Rincón de Isma, Dani Krossing
-- **Recursos web**: Stack Overflow, Medium, Kinsta, Solibeth.net, Flowbite, W3, Mozilla
+- **Youtube**: El Rincón de Isma, Dani Krossing, Laracast
+- **Recursos web**: Stack Overflow, Medium, Kinsta, Solibeth.net, Flowbite, W3, Mozilla, Reddit
+
+---
+
+## Requisitos Funcionales
+
+- **Roles y permisos:**
+  - Solo administradores y coordinadores pueden crear, editar y eliminar usuarios, cursos y asignar docentes.
+  - Solo docentes pueden ser asignados como profesores de cursos.
+  - Los alumnos solo pueden inscribirse en cursos activos y hasta un máximo de 5 cursos activos.
+- **Validaciones:**
+  - Edad mínima de alumnos: 16 años.
+  - Email y DNI únicos por usuario/alumno.
+  - Mensajes de error claros y en español.
+- **Evaluaciones y adjuntos:**
+  - Los docentes pueden cargar evaluaciones y archivos adjuntos por curso.
+- **Dashboard y navegación:**
+  - Vistas diferenciadas por rol, navegación clara y mensajes de estado.
+
+---
+
+## Modelos y Entidades
+
+- **User:** id, name, email, password, role, specialty, phone, address, active
+- **Student:** id, first_name, last_name, dni, email, birth_date, phone, address, gender, active
+- **Course:** id, title, description, start_date, end_date, status, modality, virtual_link, max_capacity, teacher_id
+- **Enrollment:** id, student_id, course_id, enrollment_date, status, final_grade, attendance, notes, graded_by_teacher
+- **Evaluation:** id, student_id, course_id, score, comments, created_at
+- **Attachment:** id, course_id, title, file_url, type, uploaded_at
+
+## Modelos
+
+### User
+- **Campos:** id, name, email, password, role, specialty, phone, address, active
+- **Funcionalidades:**
+  - Autenticación y roles (`admin`, `coordinator`, `professor`)
+  - Si el usuario es profesor, tiene muchos cursos (`courses()`)
+
+### Student
+- **Campos:** id, first_name, last_name, dni, email, birth_date, phone, address, gender, active
+- **Funcionalidades:**
+  - Tiene muchas inscripciones (`enrollments()`)
+  - Tiene muchas evaluaciones (`evaluations()`)
+
+### Course
+- **Campos:** id, title, description, start_date, end_date, status, modality, virtual_link, max_capacity, teacher_id
+- **Funcionalidades:**
+  - Pertenece a un profesor (`teacher()`)
+  - Tiene muchas inscripciones (`enrollments()`)
+  - Tiene muchas evaluaciones (`evaluations()`)
+  - Tiene muchos archivos adjuntos (`attachments()`)
+
+### Enrollment
+- **Campos:** id, student_id, course_id, enrollment_date, status, final_grade, attendance, notes, graded_by_teacher
+- **Funcionalidades:**
+  - Pertenece a un estudiante (`student()`)
+  - Pertenece a un curso (`course()`)
+
+### Evaluation
+- **Campos:** id, student_id, course_id, score, comments, created_at
+- **Funcionalidades:**
+  - Pertenece a un estudiante (`student()`)
+  - Pertenece a un curso (`course()`)
+
+### Attachment
+- **Campos:** id, course_id, title, file_url, type, uploaded_at
+- **Funcionalidades:**
+  - Pertenece a un curso (`course()`)
+
+### MODELO LÓGICO
+
+![Modelo lógico](./tp_formalities/db_der_modelo_logico/MODELO_LOGICO.png)
+
+### DIAGRAMA ENTIDAD-RELACIÓN
+![Diagrama ER](./tp_formalities/db_der_modelo_logico/DER.png)
 
 ---
 
 ## Estructura de Carpetas
 
-- **app/Http/Controllers/**: Controladores de la lógica de negocio
-- **app/Models/**: Modelos Eloquent para cada entidad
-- **database/migrations/**: Migraciones para la estructura de la base de datos
-- **database/seeders/**: Seeders para poblar la base de datos con datos de ejemplo
-- **resources/views/**: Vistas Blade para la UI
-- **resources/views/components/**: Componentes Blade reutilizables
-- **routes/web.php**: Ruteo principal de la aplicación
-- **routes/auth.php**: Rutas de autenticación Breeze
+- **app/Http/Controllers/**: Lógica de negocio y validaciones
+- **app/Models/**: Modelos Eloquent
+- **database/migrations/**: Migraciones de la base de datos
+- **database/seeders/**: Datos de prueba y validación de reglas
+- **resources/views/**: Vistas Blade y componentes
+- **routes/web.php**: Rutas principales
 
----
-
-## Modelos y Entidades Principales
-
-- **User**: Usuarios del sistema (admin/coordinador/Docente)
-  - id, name, lastName, email, password, role, specialty, phone, address, active
-- **Students**: Alumnos del sistema
-  - id, name, lastName, dni, email, birthDate, phone, address, gender, active
-- **Courses**: Cursos
-  - id, title, description, startDate, endDate, status, modality, virtualLink, maxPlaces, teacher_id
-- **Enrollment**: Inscripciones de alumnos a cursos
-  - id, student_id, course_id, enrollment_date
-- **Evaluation**: Evaluaciones de alumnos
-  - id, student_id, course_id, score, comments
-- **Attachment**: Archivos adjuntos a las evaluaciones
-  - id, evaluation_id, file_path, file_name
-
----
-
-## Variables de Entorno
-- Configurar el archivo **.env** con las variables necesarias => .env.template
 ```plaintext
-APP_NAME=SpeakIn
-APP_DESCRIPTION="Sistema de gestión de cursos de idiomas en Laravel 12"
-APP_ENV=local
-APP_KEY=base64:XXXXXXXXXXXX
-APP_DEBUG=true
-APP_URL=http://localhost
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=speakindb
-
-
+tp-final-speak-in-app/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   └── Middleware/
+│   ├── Models/
+├── bootstrap/
+├── config/
+├── database/
+│   ├── migrations/
+│   ├── seeders/
+│   └── factories/
+├── public/
+│   └── build/
+├── resources/
+│   ├── views/
+│   │   ├── components/
+│   │   ├── dashboard/
+│   │   ├── students/
+│   │   ├── courses/
+│   │   ├── enrollments/
+│   │   ├── users/
+│   │   ├── attachments/
+│   │   └── evaluations/
+│   ├── css/
+│   └── js/
+├── routes/
+│   ├── web.php
+│   └── console.php
+├── storage/
+├── tests/
+├── vendor/
+├── .env
+├── artisan
+├── composer.json
+├── package.json
+├── README.md
+└── final_readme.md
 ```
+---
 
-## Comandos Artisan Útiles
+## Instalación y Puesta en Marcha
 
-### Levantar el proyecto
+1. Clonar el repositorio:
+   ```bash
+   git clone <url-del-repo>
+   cd tp-final-speak-in-app
+   ```
+2. Instalar dependencias:
+   ```bash
+   composer install
+   npm install
+   npm run build
+   ```
+3. Configurar el archivo `.env`:
+   - Copiar `.env.example` a `.env` y completar datos de conexión MySQL.
+4. Migrar y poblar la base de datos:
+   ```bash
+   php artisan migrate --seed
+   ```
+5. Iniciar el servidor:
+   ```bash
+   php artisan serve
+   ```
+6. Acceder vía navegador a `http://localhost:8000`
 
-```bash
+---
 
-  # Levanta el servidor en http://localhost:8000
-  php artisan serve 
+### Comandos y paquetes utilizados en el desarrollo
 
-  # Importante: Para compilar bien los assets como Tailwind ejecutar run dev
-  npm run dev
-
-```
-
-
-### Crear modelos y recursos
+#### Modelos, Controladores y Recursos
 ```bash
 php artisan make:model User -mcr
 php artisan make:model Student -mcr
@@ -105,67 +188,49 @@ php artisan make:model Course -mcr
 php artisan make:model Enrollment -mcr
 php artisan make:model Evaluation -mcr
 php artisan make:model Attachment -mcr
-
 ```
 
-### Migraciones y Seeders
+#### Seeders y Factories
 ```bash
-php artisan migrate
-php artisan db:seed
-php artisan migrate:fresh # Reinicia y repuebla la base de datos # Tuve una equivocación y este comando me ayudó a resetear luego de arreglarlo (entendiendo que estamos en el inicio del proyecto)
+php artisan make:seeder UserSeeder
+php artisan make:seeder StudentSeeder
+php artisan make:seeder CourseSeeder
+php artisan make:seeder EnrollmentSeeder
+php artisan make:seeder EvaluationSeeder
+php artisan make:seeder AttachmentSeeder
+php artisan make:factory UserFactory
+php artisan make:factory StudentFactory
 ```
 
-### Compilar assets (Vite)
-```bash
-npm run dev
-npm run build # Para producción
-```
-
----
-
-## Instalación de Breeze
-
+#### Instalación de Breeze (autenticación)
 ```bash
 composer require laravel/breeze --dev
 php artisan breeze:install
 npm install && npm run dev
 ```
 
----
-
-## Instalación de Íconos SVG
-
-[Blade Icons](https://github.com/driesvints/blade-icons)
+#### Instalación de Blade UI Kit y Lucide Icons
 ```bash
 composer require blade-ui-kit/blade-icons
 composer require mallardduck/blade-lucide-icons
 ```
 
----
-
-## Instalación de idioma
-
+#### Instalación de idioma
 ```bash
 composer require --dev laravel-lang/common
 php artisan lang:add es en
 ```
 
----
-
-## Roles y Permisos
-
-- **Admin**: Puede gestionar alumnos, docentes, cursos, inscripciones y evaluaciones.
-- **Coordinador**: Puede gestionar alumnos y cargar inscripciones, pero no docentes ni cursos.
-- **Docente**: Puede ver sus cursos, inscripciones y evaluaciones, pero no puede gestionar alumnos ni docentes.
-
-### Middleware
-Para gestionar los roles y permisos, se creó un middleware personalizado que simplemente redirige a los usuarios que no tienen rol a un forbidden page.
-
+#### Otros comandos útiles
 ```bash
-
-php artisan make:middleware RoleMiddleware
-
+php artisan migrate:fresh --seed   # Reinicia y repuebla la base de datos
+php artisan route:clear
+php artisan config:clear
+php artisan cache:clear
+npm run dev                        # Compila assets en modo desarrollo
+npm run build                      # Compila assets para producción
 ```
+---
 
 ## **IMPORTANTE ANTES DE COMENZAR!**
 **- El Admin que gestiona todo es generado únicamente a través de seeder en el file database/seeders/AdminUserSeeder.php**
@@ -173,115 +238,60 @@ php artisan make:middleware RoleMiddleware
 
 ---
 
+## Usuarios de Prueba
 
-## Funcionalidades
+- **Admin:** admin@speakin.com / password
+- **Coordinador:** coord@speakin.com / password
+- **Docente:** teacher@speakin.com / password
+- **Alumno:** student@speakin.com / password
 
-- **Autenticación**: Login, registro, recuperación de contraseña (Breeze)
-- **Gestión de alumnos**: CRUD completo
-- **Gestión de docentes**: CRUD completo
-- **Gestión de cursos**: CRUD completo
-- **Gestión de inscripciones**: CRUD completo
-- **Gestión de evaluaciones**: CRUD completo
-- **Carga de archivos adjuntos**: Asociados a evaluaciones
-- **Dashboard**: Estadísticas y accesos rápidos según el rol
+* Usamos un middleware para redirigir a los usuarios según su rol al iniciar sesión.
 
 ---
 
-## Filtros y Búsquedas
-TBD
+## Notas y Recursos
 
----
+- Framework: Laravel 12
+- Autenticación: Breeze
+- Estilos: Tailwind CSS
+- Base de datos: MySQL
+- Componentes Blade reutilizables
+- Recursos: Stack Overflow, Medium, Kinsta, Flowbite, W3, Mozilla
+- Web Icon: Ícono genérico extraido de [FlatIcon](https://www.flaticon.com/)
+- Para cambiar el idioma de los componentes de Laravel (ej. paginate()) edita `resources/lang/es/pagination.php`.
 
-## Paginación
-
-Se utiliza el método Eloquent `paginate()` en los controladores.  
-Los enlaces de paginación se muestran con `{{ $modelo->links() }}` en las vistas.
 
 ---
 
 ## Personalización de Estilos
 
 - **Tailwind CSS**: Configurado en `tailwind.config.js` con personalizaciones
-- **Breakpoints**: El breakpoint `sm` está personalizado a 700px
-- **Login**: Fondo personalizado con SVG en `resources/css/app.css` y aplicado en el layout `guest.blade.php`
 
 ---
 
----
-
-## Modelos
-
-### User
-
-- **Campos:** id, name, email, password, role
-- **Funcionalidades:**  
-  - Autenticación y roles (`admin`, `coordinator`, `professor`)
-  - Relación: Si el usuario es profesor, tiene muchos cursos (`courses()`)
-
-### Student
-- **Campos:** id, first_name, last_name, dni, email, birth_date, phone, address, gender, active
-- **Funcionalidades:**  
-  - Relación: Tiene muchas inscripciones (`enrollments()`)
-  - Relación: Tiene muchas evaluaciones (`evaluations()`)
-
-### Course
-- **Campos:** id, title, description, start_date, end_date, status, modality, virtual_link, max_capacity, teacher_id
-- **Funcionalidades:**  
-  - Relación: Pertenece a un profesor (`teacher()`)
-  - Relación: Tiene muchas inscripciones (`enrollments()`)
-  - Relación: Tiene muchas evaluaciones (`evaluations()`)
-  - Relación: Tiene muchos archivos adjuntos (`attachments()`)
-
-### Enrollment
-- **Campos:** id, student_id, course_id, enrollment_date, status, final_grade, attendance, notes, graded_by_teacher
-- **Funcionalidades:**  
-  - Relación: Pertenece a un estudiante (`student()`)
-  - Relación: Pertenece a un curso (`course()`)
-
-### Evaluation
-- **Campos:** id, student_id, course_id, score, comments
-- **Funcionalidades:**  
-  - Relación: Pertenece a un estudiante (`student()`)
-  - Relación: Pertenece a un curso (`course()`)
-
-### Attachment
-- **Campos:** id, course_id, title, file_url, type, uploaded_at
-- **Funcionalidades:**  
-  - Relación: Pertenece a un curso (`course()`)
-
----
-
-
-## Configuración y Estructura de Modelos, Migraciones y Seeders
+## Configuración y Estructura: Modelos, Migraciones, Seeders y Middleware
 
 ### Modelos Eloquent
-
-Todos los modelos principales (`User`, `Student`, `Course`, `Enrollment`, `Evaluation`, `Attachment`) están definidos en `app/Models/` y cumplen con las siguientes buenas prácticas:
-
+Todos los modelos principales (`User`, `Student`, `Course`, `Enrollment`, `Evaluation`, `Attachment`) están definidos en `app/Models/` y siguen buenas prácticas:
 - Uso del trait `HasFactory` para compatibilidad con factories y seeders.
-- Definición del array `$fillable` con los campos permitidos para asignación masiva.
+- Definición del array `$fillable` para asignación masiva.
 - Relaciones Eloquent correctamente implementadas entre entidades (por ejemplo, `Student` tiene muchas `Enrollment` y `Evaluation`, `Course` pertenece a un `User` como profesor, etc.).
 
 ### Migraciones
-
 Las migraciones definen la estructura de la base de datos alineada a la consigna:
-
-- Campos y enums en inglés.
-- Relaciones entre tablas mediante claves foráneas.
-- Restricciones de unicidad y reglas de negocio reflejadas en los controladores.
+- Los campos y enums están en inglés.
+- Las relaciones entre tablas se establecen mediante claves foráneas.
+- Las restricciones de unicidad y reglas de negocio se reflejan en los controladores y migraciones.
 
 ### Seeders y Factories
-
 - El seeder principal (`DatabaseSeeder.php`) crea usuarios con roles (`admin`, `coordinator`, `professor`), estudiantes, cursos, inscripciones, evaluaciones y archivos adjuntos de prueba.
-- Las factories (`UserFactory.php`, `StudentFactory.php`) permiten poblar la base de datos con datos realistas y variados para pruebas y desarrollo.
+- Las factories (`UserFactory.php`, `StudentFactory.php`, etc.) permiten poblar la base de datos con datos realistas y variados para pruebas y desarrollo.
 
 ### Middleware de Roles
-
 - Se implementó un middleware personalizado (`RoleMiddleware.php`) para restringir el acceso a rutas según el rol del usuario.
-- El middleware se registra en `routes/Middleware.php` y se utiliza en las rutas con la sintaxis `role:admin,coordinator,professor`.
+- El middleware se registra y se utiliza en las rutas con la sintaxis `role:admin,coordinator,professor`.
 
 ### Proceso de Inicialización
-
 1. Ejecuta las migraciones y seeders:
    ```bash
    php artisan migrate:fresh --seed
@@ -291,113 +301,116 @@ Las migraciones definen la estructura de la base de datos alineada a la consigna
 ---
 
 ## Estado Actual
-
-- **Migraciones, modelos y seeders listos y alineados a la consigna.**
-- **Controladores CRUD implementados con validaciones y reglas de negocio.**
-- **Middleware de roles funcionando en Laravel 12.**
-- **Base de datos poblada y lista para desarrollo de vistas y lógica de negocio.**
-
----
----
-
-## Referencias y Recursos
-
-- Laravel Breeze
-- Carbon Nesbot documentation
-- Blade Lucide Icons
-- Blade UI Kit
-- Tailwind CSS
-- Vite / Laravel Mix
-- Laravel documentation
-- Youtube: El Rincón de Isma, Dani Krossing
-- Stack Overflow, Medium, Kinsta, Solibeth.net, Flowbite, Tailwind documentation 
+- Migraciones, modelos y seeders completos y alineados a la consigna.
+- Controladores CRUD implementados con validaciones y reglas de negocio.
+- Middleware de roles funcionando en Laravel 12.
+- Base de datos poblada y lista para desarrollo de vistas y lógica de negocio.
 
 ---
 
-## Notas
+## Esquema de Capturas de Pantalla para Casos de Uso
 
-- Para cambiar el idioma de los componentes de Laravel (ej. paginate()) edita `resources/lang/es/pagination.php`.
+A continuación se presenta un esquema para mostrar las capturas necesarias que evidencian el cumplimiento de los requerimientos de la consigna.
 
+### 1. **Autenticación y Roles**
+- Pantalla de login (UI en español)
+- Dashboard para cada rol:
+  - Administrador
+  - Coordinador
+  - Docente
 
+### 2. **Operaciones CRUD**
+- Alumnos: Listado, Crear, Editar, Ver, Eliminar
+- Docentes: Listado, Crear, Editar, Ver, Eliminar
+- Cursos: Listado, Crear, Editar, Ver, Eliminar
+- Inscripciones: Listado, Crear, Editar, Ver, Eliminar
+- Evaluaciones: Listado, Crear, Editar, Ver, Eliminar
+- Archivos adjuntos: Listado, Crear, Editar, Ver, Eliminar
 
-php artisan route:clear
-php artisan config:clear
-php artisan cache:clear
+### 3. **Restricciones por Rol**
+- Admin creando/editando/eliminando usuarios y cursos
+- Coordinador registrando alumnos e inscripciones (sin acceso a gestión de usuarios/cursos)
+- Docente visualizando solo sus cursos, inscripciones y evaluaciones (sin acceso a eliminar/editar entidades restringidas)
 
-## Check final
-### Trabajo Fianal
+### 4. **Validaciones y Mensajes de Error**
+- Intento de crear email/DNI duplicado (mostrar error)
+- Intento de inscribir alumno en más de 5 cursos activos (mostrar error)
+- Intento de asignar más de 3 cursos activos a un docente (mostrar error)
+- Validación de formato de archivo adjunto (error por formato inválido)
+- Curso asignado a docente inactivo (mostrar error)
+- Curso excediendo cupo máximo (mostrar error)
+- Curso sin alumnos al finalizar (mostrar error)
 
+### 5. **UI/UX y Navegación**
+- Barra de navegación principal (opciones según rol)
+- Dashboard con métricas y accesos rápidos
+- Paginación en listados
+- Mensajes de estado y error en español
 
-### Review
+### 6. **Archivos Adjuntos y Evaluaciones**
+- Carga de archivo adjunto (formatos válidos)
+- Visualización de archivos adjuntos vinculados a cursos/evaluaciones
+- Creación y visualización de evaluaciones para alumnos
 
-- Requerimientos: 
-
-
-# MUCHAS GRACIAS POR TODO! 🤓
-
-
-
-
-
-
-
-
-1. Estructura y Arquitectura
-- [X] Proyecto Laravel correctamente inicializado
-- [X] Uso del patrón MVC (Model-View-Controller)
-- [X] Modelos Eloquent con relaciones (hasMany, belongsTo, etc.)
-- [X] Migraciones reversibles y completas para todas las entidades
-- [X] Seeders con datos de prueba
-2. Entidades y Migraciones
-- [X] Alumnos: id, nombre, apellido, dni (único), email (único), fecha_nacimiento, teléfono, dirección, género (enum), activo (boolean)
-- [X] Docentes: id, nombre, apellido, dni (único), email (único), especialidad, teléfono, dirección, activo (boolean)
-- [X] Cursos: id, título, descripción, fecha_inicio, fecha_fin, estado (enum), modalidad (enum), aula_virtual (nullable), cupos_maximos, docente_id (FK)
-- [X] Inscripciones: id, alumno_id (FK), curso_id (FK), fecha_inscripción, estado (enum), nota_final (nullable), asistencias, observaciones (nullable), evaluado_por_docente (boolean)
-- [X] Usuarios: id, name, email (único), password, rol (enum: admin, coordinador)
-- [X] Evaluaciones: id, alumno_id (FK), curso_id (FK), descripcion, nota, fecha
-- [X] Archivos Adjuntos: id, curso_id (FK), titulo, archivo_url, tipo (enum), fecha_subida
-3. Validaciones y Reglas de Negocio
-- [X] Edad mínima de alumnos: 16 años
-- [X] Email y DNI únicos y válidos
-- [X] No puede duplicarse una inscripción (alumno_id + curso_id único)
-- [X] Nota solo si fue evaluado y entre 1 y 10
-- [X] Un docente no puede tener más de 3 cursos activos
-- [X] Un alumno no puede tener más de 5 cursos activos
-- [X] No se pueden asignar cursos nuevos a docentes inactivos
-- [X] Curso no puede finalizar si no tiene alumnos
-- [X] Curso no puede superar el cupo máximo
-- [X] Solo cursos activos pueden aceptar inscripciones
-- [X] Validar formato de archivos adjuntos (PDF, DOCX, PPT, JPG, PNG)
-- [X] Solo administradores o docentes pueden cargar archivos
-4. CRUDs y Funcionalidad
-- [X] CRUD completo para Alumnos
-- [X] CRUD completo para Docentes
-- [X] CRUD completo para Cursos
-- [X] CRUD completo para Inscripciones
-- [X] CRUD completo para Evaluaciones
-- [X] CRUD completo para Archivos Adjuntos
-- [X] CRUD y gestión de Usuarios (registro, login, logout, roles)
-5. Roles y Permisos
-- [X] Solo admin y coordinador pueden crear, editar y eliminar usuarios, cursos y asignar docentes
-- [X] Solo docentes pueden ser asignados como profesores de cursos
-- [X] Coordinadores solo pueden registrar alumnos y cargar inscripciones
-- [X] Restricción de acciones en controladores y vistas según rol
-6. Vistas y UI
-- [X] Vistas Blade diferenciadas por rol (admin, coordinador, docente, alumno)
-- [X] Dashboard con métricas y accesos rápidos por rol
-- [X] Navegación clara y mensajes de estado en español
-- [X] Mensajes de error claros y en español
-7. Documentación
-- [X] README con descripción general del sistema
-- [X] Instrucciones para instalar y ejecutar el proyecto
-- [X] Roles y funcionalidades habilitadas por perfil
-- [X] Diagrama Entidad-Relación (ER) adjunto o enlace
-- [X] Capturas de pantalla funcionales
-- [X] Datos de prueba cargados (seeders)
-8. Extras y Buenas Prácticas
-- [X] Código limpio y comentado
-- [X] Uso de layouts y componentes Blade reutilizables
-- [ ] Pruebas unitarias o de integración básicas (opcional pero recomendable)
-- [X] Estructura de carpetas ordenada y siguiendo la convención Laravel
 
 ---
+
+1. Pantalla de Login
+
+* 1.1 Pantalla inicial
+![Pantalla de Login](./tp_formalities/snapshots/auth/login.png)
+
+* 1.2 Validación de Login
+![Validación de Login](./tp_formalities/snapshots/auth/validation.png)
+
+2. Dashboard
+
+* 2.1 Dashboard Admin
+![Dashboard Admin](./tp_formalities/snapshots/dashboard/admin.png)
+
+* 2.2 Dashboard Coordinador
+![Dashboard Coordinador](./tp_formalities/snapshots/dashboard/coordinator.png)
+
+* 2.3 Dashboard Docente
+![Dashboard Docente](./tp_formalities/snapshots/dashboard/teacher.png)
+
+3. CRUD de Alumnos
+
+* 3.1 Listado de Alumnos
+![Listado de Alumnos](./tp_formalities/snapshots/students/index.png)
+
+* 3.2 Crear Alumno
+![Crear Alumno](./tp_formalities/snapshots/students/createValidation.png)
+![Crear Alumno](./tp_formalities/snapshots/students/created.png)
+
+* 3.3 Editar Alumno
+![Editar Alumno](./tp_formalities/snapshots/students/edit.png)
+
+* 3.4 Ver Alumno
+![Ver Alumno](./tp_formalities/snapshots/students/show.png)
+
+* 3.5 Eliminar Alumno
+![Eliminar Alumno](./tp_formalities/snapshots/students/deleteConfirm.png)
+![Eliminar Alumno](./tp_formalities/snapshots/students/deleted.png)
+
+4. CRUD Attachments
+
+* 4.1 Listado de Attachments
+![Listado de Attachments](./tp_formalities/snapshots/attachments/index.png)
+
+* 4.2 Crear Attachment
+![Crear Attachment](./tp_formalities/snapshots/attachments/createForm.png)
+![Crear Attachment](./tp_formalities/snapshots/attachments/selectingFile.png)
+![Crear Attachment](./tp_formalities/snapshots/attachments/created.png)
+
+* 4.3 Editar Attachment
+![Editar Attachment](./tp_formalities/snapshots/attachments/edit.png)
+
+* 4.4 Ver Attachment
+![Ver Attachment](./tp_formalities/snapshots/attachments/show.png)
+
+--- 
+
+## Nota final
+- Muchas gracias por tomarte el tiempo de revisar este proyecto, agregaré más capturas con casos de uso y funcionalidades en el futuro! 
+
